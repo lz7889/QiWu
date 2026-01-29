@@ -205,8 +205,8 @@ const colorMap = {
 // 获取file文件数据
 const loadExcelData = async () => {
   try {
-    // 获取 Excel 文件
-    const response = await fetch("/file/SPMV.xlsx");
+    // 获取 Excel 文件 - 使用 BASE_URL 确保在 GitHub Pages 子路径部署时也能正确访问
+    const response = await fetch(`${import.meta.env.BASE_URL}file/SPMV.xlsx`);
     const arrayBuffer = await response.arrayBuffer();
 
     // 解析 Excel 文件
@@ -267,6 +267,11 @@ const loadExcelData = async () => {
     }
   } catch (error) {
     console.error("读取 Excel 文件失败:", error);
+    console.error(
+      "尝试访问的路径:",
+      `${import.meta.env.BASE_URL}file/SPMV.xlsx`,
+    );
+    proxy.$message.error("加载数据文件失败，请检查文件路径");
   }
 };
 
