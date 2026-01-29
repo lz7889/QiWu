@@ -22,6 +22,7 @@
           <component :is="Component" />
         </keep-alive>
       </router-view>
+      <el-backtop target=".layout-main" :right="100" :bottom="50" />
     </div>
   </div>
 </template>
