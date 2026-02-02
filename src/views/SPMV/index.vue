@@ -1,6 +1,6 @@
 <template>
   <div class="spmv-container">
-    <div class="page-card">
+    <div v-loading="loading" class="page-card">
       <div class="page-back" @click="proxy.$router.go(-1)">
         <img class="img" src="@/assets/images/back.png" />
         <span>返回</span>
@@ -12,7 +12,7 @@
         <el-divider direction="vertical" />
         <el-link type="primary">Summit your code</el-link>
         <el-divider direction="vertical" />
-        <el-link type="primary"> Add your result</el-link>
+        <el-link type="primary" @click="handleResult"> Add your result</el-link>
       </div>
 
       <div class="page-search">
@@ -174,7 +174,7 @@ const machineCompilerOptins = ref([]);
 const dataTypeOptins = ref([]);
 const timePhaseOptins = ref([]);
 const matList = ref([]);
-
+const loading = ref(false);
 const state = reactive({
   searchForm: {
     machineCompiler: "",
@@ -204,6 +204,7 @@ const colorMap = {
 
 // 获取file文件数据
 const loadExcelData = async () => {
+  loading.value = true;
   try {
     // 获取 Excel 文件 - 使用 BASE_URL 确保在 GitHub Pages 子路径部署时也能正确访问
     const response = await fetch(`${import.meta.env.BASE_URL}file/SPMV.xlsx`);
@@ -230,20 +231,26 @@ const loadExcelData = async () => {
 
       let machineCompilerList = [];
       jsonData.slice(2).forEach((row) => {
-        if (row[1] !== undefined && row[1] !== null && row[1] !== "") {
-          machineCompilerList.push(row[1]);
+        const value =
+          row[1] !== undefined && row[1] !== null ? String(row[1]).trim() : "";
+        if (value !== "") {
+          machineCompilerList.push(value);
         }
       });
       let dataTypeList = [];
       jsonData.slice(2).forEach((row) => {
-        if (row[2] !== undefined && row[2] !== null && row[2] !== "") {
-          dataTypeList.push(row[2]);
+        const value =
+          row[2] !== undefined && row[2] !== null ? String(row[2]).trim() : "";
+        if (value !== "") {
+          dataTypeList.push(value);
         }
       });
       let timePhaseList = [];
       jsonData.slice(2).forEach((row) => {
-        if (row[5] !== undefined && row[5] !== null && row[5] !== "") {
-          timePhaseList.push(row[5]);
+        const value =
+          row[5] !== undefined && row[5] !== null ? String(row[5]).trim() : "";
+        if (value !== "") {
+          timePhaseList.push(value);
         }
       });
 
@@ -263,10 +270,11 @@ const loadExcelData = async () => {
         state.searchForm.timePhase = timePhaseOptins.value[0];
       }
 
+      loading.value = false;
       filterExcelData();
     }
   } catch (error) {
-    console.error("读取 Excel 文件失败:", error);
+    loading.value = false;
     console.error(
       "尝试访问的路径:",
       `${import.meta.env.BASE_URL}file/SPMV.xlsx`,
@@ -299,6 +307,21 @@ const filterExcelData = () => {
   });
 
   state.baseData = state.tableData.find((item) => item["Baseline tag"] === "T");
+
+  // 排序：Baseline tag 为 T 的排第一，其余按 Matrix-all 从小到大排序
+  state.tableData.sort((a, b) => {
+    const isABaseline = a["Baseline tag"] === "T";
+    const isBBaseline = b["Baseline tag"] === "T";
+
+    // 如果 a 是 baseline，排在前面
+    if (isABaseline && !isBBaseline) return -1;
+    // 如果 b 是 baseline，排在前面
+    if (!isABaseline && isBBaseline) return 1;
+    // 如果都是或都不是 baseline，按 Matrix-all 排序
+    const aValue = parseFloat(a["Matrix-all"]) || 0;
+    const bValue = parseFloat(b["Matrix-all"]) || 0;
+    return aValue - bValue;
+  });
 
   console.log("state.tableData", state.tableData);
   console.log("state.baseData", state.baseData);
@@ -360,8 +383,14 @@ const getLegendLabel = (key) => {
   return labels[key] || "";
 };
 
+// Source
 const handleSource = () => {
   window.open("https://github.com/QiWu-NCIC/QiWu-SpMV", "_blank");
+};
+
+// 修改结果文件
+const handleResult = () => {
+  window.open("https://github.com/lz7889/QiWu/tree/main/public/file", "_blank");
 };
 
 onMounted(() => {
