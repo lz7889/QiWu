@@ -10,7 +10,7 @@
       <div class="page-navbar">
         <el-link type="primary" @click="handleSource">Source</el-link>
         <el-divider direction="vertical" />
-        <el-link type="primary">Summit your code</el-link>
+        <el-link type="primary" @click="handleSummit">Summit your code</el-link>
         <el-divider direction="vertical" />
         <el-link type="primary" @click="handleResult"> Add your result</el-link>
       </div>
@@ -385,6 +385,11 @@ const getLegendLabel = (key) => {
 
 // Source
 const handleSource = () => {
+  window.open("https://github.com/QiWu-NCIC/QiWu-SpMV", "_blank");
+};
+
+//
+const handleSummit = () => {
   window.open("https://github.com/QiWu-NCIC/QiWu-SpMV", "_blank");
 };
 
